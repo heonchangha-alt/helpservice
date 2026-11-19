@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Help Service Portal"
+description = "디스커버리 그룹 4개사 공용 IT 서비스 포털. 요청자 셀프서비스, 상담원 워크스페이스, 관리자 운영 대시보드에서 IT 요청의 표준 처리 과정과 리드타임을 추적합니다."
+version = "1.0.0"
+id = "artifacts/help-service-portal"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24803
+
+[services.development]
+run = "pnpm --filter @workspace/help-service-portal run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/help-service-portal", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/help-service-portal/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24803"
+BASE_PATH = "/"
