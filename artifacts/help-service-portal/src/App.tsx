@@ -4,13 +4,14 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
-import { Redirect, Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
+import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 import { StoreProvider } from '@/lib/store';
 import { AppShell } from '@/components/layout';
 import HomePage from '@/pages/home';
 import CatalogPage from '@/pages/catalog';
 import RequestsPage from '@/pages/requests';
 import RequestDetailPage from '@/pages/request-detail';
+import WorkspacePage from '@/pages/workspace';
 import DashboardPage from '@/pages/dashboard';
 import { KnowledgeDetailPage, KnowledgeListPage } from '@/pages/knowledge';
 import NotificationsPage from '@/pages/notifications';
@@ -27,7 +28,7 @@ function Router() {
           <Route path="/catalog" component={CatalogPage} />
           <Route path="/requests" component={RequestsPage} />
           <Route path="/requests/:id" component={RequestDetailPage} />
-          <Route path="/workspace"><Redirect to="/" replace /></Route>
+          <Route path="/workspace" component={WorkspacePage} />
           <Route path="/dashboard" component={DashboardPage} />
           <Route path="/knowledge" component={KnowledgeListPage} />
           <Route path="/knowledge/:id" component={KnowledgeDetailPage} />

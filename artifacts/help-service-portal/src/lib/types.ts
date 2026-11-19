@@ -5,9 +5,10 @@ export const PRIORITIES = ["긴급", "높음", "보통", "낮음"] as const;
 export type Priority = (typeof PRIORITIES)[number];
 export const SLA_HOURS: Record<Priority, number> = { 긴급: 4, 높음: 8, 보통: 24, 낮음: 72 };
 
-export type Role = "requester" | "manager";
+export type Role = "requester" | "agent" | "manager";
 export const ROLE_LABEL: Record<Role, string> = {
   requester: "요청자",
+  agent: "상담원",
   manager: "관리자",
 };
 

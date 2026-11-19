@@ -1,6 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
-import { Bell, BookOpen, Gauge, Home, LayoutGrid, ListChecks, Menu, Search, Settings, X } from "lucide-react";
+import { Bell, BookOpen, Gauge, Headset, Home, LayoutGrid, ListChecks, Menu, Search, Settings, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useStore } from "@/lib/store";
 import { ROLE_LABEL, type Role } from "@/lib/types";
@@ -11,11 +11,12 @@ const NAV = [
   { href: "/requests", label: "요청 현황", icon: ListChecks, group: "셀프서비스 포털" },
   { href: "/knowledge", label: "지식 검색", icon: BookOpen, group: "셀프서비스 포털" },
   { href: "/notifications", label: "알림 수신함", icon: Bell, group: "셀프서비스 포털" },
+  { href: "/workspace", label: "상담원 워크스페이스", icon: Headset, group: "처리 · 운영" },
   { href: "/dashboard", label: "운영 대시보드", icon: Gauge, group: "처리 · 운영" },
   { href: "/settings", label: "설정", icon: Settings, group: "시스템" },
 ];
 
-const ROLE_HOME: Record<Role, string> = { requester: "/", manager: "/dashboard" };
+const ROLE_HOME: Record<Role, string> = { requester: "/", agent: "/workspace", manager: "/dashboard" };
 
 function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const [loc, setLoc] = useLocation();
@@ -34,7 +35,7 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         </div>
       </div>
       <div className="mx-4 mb-4 rounded-lg bg-sidebar-accent p-1" role="radiogroup" aria-label="미리보기 역할">
-        <div className="grid grid-cols-2 gap-1">
+        <div className="grid grid-cols-3 gap-1">
           {(Object.keys(ROLE_LABEL) as Role[]).map((r) => (
             <button
               key={r}

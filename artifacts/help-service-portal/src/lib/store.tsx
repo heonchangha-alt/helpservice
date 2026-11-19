@@ -11,8 +11,7 @@ function load(): { state: AppState; error: string | null } {
     if (!raw) return { state: buildSeed(), error: null };
     const parsed = JSON.parse(raw) as AppState;
     if (parsed.version !== 1 || !Array.isArray(parsed.requests)) throw new Error("bad");
-    // Retired preview roles fall back without resetting saved requests.
-    return { state: { ...parsed, role: parsed.role === "manager" ? "manager" : "requester" }, error: null };
+    return { state: { ...parsed, role: parsed.role === "manager" || parsed.role === "agent" ? parsed.role : "requester" }, error: null };
   } catch {
     return { state: buildSeed(), error: "저장된 데모 데이터를 읽지 못해 샘플 데이터로 다시 시작했습니다." };
   }
@@ -34,6 +33,7 @@ interface Store {
   setRole: (r: Role) => void;
   createRequest: (i: NewRequestInput) => ServiceRequest;
   advance: (ids: string[]) => void;
+  assign: (ids: string[], agent: string) => void;
   rate: (id: string, rating: number, feedback: string) => void;
   markRead: (id: string) => void;
   markAllRead: () => void;
@@ -113,6 +113,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const assign = useCallback((ids: string[], agent: string) => {
+    setState((s) => {
+      let next: AppState = { ...s, requests: s.requests.map((r) => (ids.includes(r.id) ? { ...r, assignee: agent } : r)) };
+      s.requests.filter((r) => ids.includes(r.id)).forEach((r) => {
+        next = notify(next, `${r.code} 담당자 배정`, `${agent} 상담원이 '${r.title}' 요청을 담당합니다.`, r.id);
+      });
+      return next;
+    });
+  }, []);
+
   const rate = useCallback((id: string, rating: number, feedback: string) => {
     setState((s) => {
       const now = new Date().toISOString();
@@ -137,6 +147,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setRole: (role) => setState((s) => ({ ...s, role })),
       createRequest,
       advance,
+      assign,
       rate,
       markRead: (id) => setState((s) => ({ ...s, notifications: s.notifications.map((n) => (n.id === id ? { ...n, read: true } : n)) })),
       markAllRead: () => setState((s) => ({ ...s, notifications: s.notifications.map((n) => ({ ...n, read: true })) })),
@@ -144,7 +155,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       reset: () => setState(buildSeed()),
       companyLabel: (id) => state.companies.find((c) => c.id === id)?.label ?? id,
     }),
-    [state, loadError, createRequest, advance, rate],
+    [state, loadError, createRequest, advance, assign, rate],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
