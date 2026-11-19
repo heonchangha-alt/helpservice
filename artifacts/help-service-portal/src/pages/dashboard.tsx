@@ -42,7 +42,7 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <PageHeader eyebrow="운영 대시보드" title="SLA · 업무 현황" desc="모든 수치는 이 브라우저에 저장된 요청의 실제 타임스탬프로 계산합니다."
+      <PageHeader eyebrow="운영 대시보드" title="SLA · 업무 현황" desc="모든 수치는 서버 데이터베이스에 저장된 요청의 실제 타임스탬프로 계산합니다. 5초마다 최신 상태를 조회합니다."
         actions={
           <select aria-label="회사 필터" data-testid="select-dashboard-company" value={company} onChange={(e) => setCompany(e.target.value)} className="h-9 rounded-lg border bg-card px-3 text-sm">
             <option value="">그룹 통합</option>{state.companies.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}

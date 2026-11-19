@@ -11,6 +11,101 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /portal:
+    get:
+      operationId: getPortal
+      responses:
+        "200":
+          description: Shared portal data
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PortalSnapshot" }
+  /portal/requests:
+    post:
+      operationId: createPortalRequest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RequestInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PortalRequest" }
+  /portal/batch:
+    post:
+      operationId: batchPortalRequests
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BatchInput" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PortalSnapshot" }
+  /portal/requests/{id}/rating:
+    post:
+      operationId: ratePortalRequest
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string, minLength: 1 } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RatingInput" }
+      responses:
+        "200":
+          description: Rated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PortalSnapshot" }
+  /portal/companies:
+    patch:
+      operationId: savePortalCompanies
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CompanyInput" }
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PortalSnapshot" }
+  /portal/notifications/read:
+    post:
+      operationId: readPortalNotifications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReadInput" }
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PortalSnapshot" }
+  /portal/import:
+    post:
+      operationId: importPortalRequests
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LegacyInput" }
+      responses:
+        "200":
+          description: Imported without overwriting shared requests
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PortalSnapshot" }
   /healthz:
     get:
       operationId: healthCheck
@@ -26,6 +121,102 @@ paths:
                 $ref: "#/components/schemas/HealthStatus"
 components:
   schemas:
+    PortalCompany:
+      type: object
+      required: [id, label]
+      properties:
+        id: { type: string, minLength: 1, maxLength: 100 }
+        label: { type: string, minLength: 1, maxLength: 100 }
+    PortalTransition:
+      type: object
+      required: [stage, at, by]
+      properties:
+        stage: { $ref: "#/components/schemas/PortalStage" }
+        at: { type: string, format: date-time }
+        by: { type: string, minLength: 1, maxLength: 100 }
+    PortalStage:
+      type: string
+      enum: [접수, 검토, 승인, 작업, 완료, 평가]
+    PortalPriority:
+      type: string
+      enum: [긴급, 높음, 보통, 낮음]
+    PortalRequest:
+      type: object
+      required: [id, code, title, description, companyId, serviceId, fields, priority, stage, requester, assignee, createdAt, dueAt, transitions, rating, feedback, isSample]
+      properties:
+        id: { type: string, minLength: 1, maxLength: 200 }
+        code: { type: string }
+        title: { type: string, minLength: 4, maxLength: 300 }
+        description: { type: string, maxLength: 10000 }
+        companyId: { type: string }
+        serviceId: { type: string }
+        fields: { type: object, additionalProperties: { type: string, maxLength: 2000 } }
+        priority: { $ref: "#/components/schemas/PortalPriority" }
+        stage: { $ref: "#/components/schemas/PortalStage" }
+        requester: { type: string, minLength: 1, maxLength: 100 }
+        assignee: { type: [string, "null"] }
+        createdAt: { type: string, format: date-time }
+        dueAt: { type: string, format: date-time }
+        transitions: { type: array, minItems: 1, maxItems: 6, items: { $ref: "#/components/schemas/PortalTransition" } }
+        rating: { type: [integer, "null"], minimum: 1, maximum: 5 }
+        feedback: { type: [string, "null"], maxLength: 4000 }
+        isSample: { type: boolean }
+    PortalNotification:
+      type: object
+      required: [id, at, title, body, requestId, read]
+      properties:
+        id: { type: string }
+        at: { type: string, format: date-time }
+        title: { type: string }
+        body: { type: string }
+        requestId: { type: [string, "null"] }
+        read: { type: boolean }
+    PortalSnapshot:
+      type: object
+      required: [companies, requests, notifications]
+      properties:
+        companies: { type: array, items: { $ref: "#/components/schemas/PortalCompany" } }
+        requests: { type: array, items: { $ref: "#/components/schemas/PortalRequest" } }
+        notifications: { type: array, items: { $ref: "#/components/schemas/PortalNotification" } }
+    RequestInput:
+      type: object
+      required: [title, description, companyId, serviceId, fields, priority]
+      properties:
+        title: { type: string, minLength: 4, maxLength: 300 }
+        description: { type: string, maxLength: 10000 }
+        companyId: { type: string, minLength: 1, maxLength: 100 }
+        serviceId: { type: string, minLength: 1, maxLength: 100 }
+        fields: { type: object, additionalProperties: { type: string, maxLength: 2000 } }
+        priority: { $ref: "#/components/schemas/PortalPriority" }
+    BatchInput:
+      type: object
+      required: [ids, action, expectedStages]
+      properties:
+        ids: { type: array, minItems: 1, maxItems: 100, uniqueItems: true, items: { type: string } }
+        action: { type: string, enum: [assign, advance] }
+        assignee: { type: string, maxLength: 100 }
+        expectedStages: { type: object, additionalProperties: { $ref: "#/components/schemas/PortalStage" } }
+    RatingInput:
+      type: object
+      required: [rating, feedback]
+      properties:
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        feedback: { type: string, minLength: 2, maxLength: 4000 }
+    CompanyInput:
+      type: object
+      required: [companies]
+      properties:
+        companies: { type: array, minItems: 1, maxItems: 4, items: { $ref: "#/components/schemas/PortalCompany" } }
+    ReadInput:
+      type: object
+      required: [ids]
+      properties:
+        ids: { type: array, maxItems: 1000, items: { type: string } }
+    LegacyInput:
+      type: object
+      required: [requests]
+      properties:
+        requests: { type: array, maxItems: 200, items: { $ref: "#/components/schemas/PortalRequest" } }
     HealthStatus:
       type: object
       properties:

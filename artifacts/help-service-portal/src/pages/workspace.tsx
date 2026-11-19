@@ -70,9 +70,9 @@ export default function WorkspacePage() {
       <div className="sticky top-[61px] z-10 mb-3 flex flex-wrap items-center gap-2 rounded-xl border bg-card/95 px-3 py-2 backdrop-blur">
         <span className="text-sm font-semibold" data-testid="text-selected-count">{valid.length}건 선택</span>
         <select aria-label="배정할 상담원" value={agent} onChange={(e) => setAgent(e.target.value)} className={sel}>{AGENTS.map((a) => <option key={a}>{a}</option>)}</select>
-        <button disabled={!valid.length} data-testid="button-batch-assign" onClick={() => { assign(valid, agent); toast({ title: `${valid.length}건을 ${agent}에게 배정했습니다` }); }}
+        <button disabled={!valid.length} data-testid="button-batch-assign" onClick={async () => { if (await assign(valid, agent)) toast({ title: `${valid.length}건을 ${agent}에게 배정했습니다` }); }}
           className="rounded-lg border bg-card px-3 py-1.5 text-sm font-semibold disabled:opacity-40">배정</button>
-        <button disabled={!advanceable.length} data-testid="button-batch-advance" onClick={() => { advance(advanceable); toast({ title: `${advanceable.length}건을 다음 단계로 진행했습니다` }); setSelected([]); }}
+        <button disabled={!advanceable.length} data-testid="button-batch-advance" onClick={async () => { if (await advance(advanceable)) { toast({ title: `${advanceable.length}건을 다음 단계로 진행했습니다` }); setSelected([]); } }}
           className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-1.5 text-sm font-bold text-primary-foreground disabled:opacity-40"><CheckCheck className="h-4 w-4" /> 다음 단계로</button>
         {valid.length > 0 && <button onClick={() => setSelected([])} className="ml-auto text-xs text-muted-foreground underline">선택 해제</button>}
       </div>

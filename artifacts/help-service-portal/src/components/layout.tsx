@@ -82,9 +82,10 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       </nav>
       <div className="border-t border-sidebar-border px-5 py-4 text-[11px] text-sidebar-foreground/60">
         <div className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-sidebar-primary" /> 데모 환경 · 로컬 저장
+          <span className="h-1.5 w-1.5 rounded-full bg-sidebar-primary" /> 공용 데모 · 서버 DB 저장
         </div>
         <div className="mt-1">SSO · Jira · Confluence 미연결</div>
+        <div className="mt-1">로그인 미적용 · 실제 업무정보 입력 금지</div>
       </div>
     </div>
   );
@@ -94,7 +95,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const [, setLoc] = useLocation();
-  const { state, loadError, dismissError } = useStore();
+  const { state, loadError, dismissError, legacyCount, legacyError } = useStore();
   const unread = state.notifications.filter((n) => !n.read).length;
 
   const submit = (e: FormEvent) => {
@@ -148,6 +149,12 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div role="alert" className="mx-4 mt-4 flex items-center justify-between rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-2 text-sm text-destructive md:mx-8">
             {loadError}
             <button onClick={dismissError} className="font-semibold underline">닫기</button>
+          </div>
+        )}
+        {(legacyCount > 0 || legacyError) && (
+          <div className="mx-4 mt-4 rounded-lg border bg-accent/60 px-4 py-3 text-sm md:mx-8">
+            {legacyError ?? `이전 브라우저에 직접 만든 요청 ${legacyCount}건이 남아 있습니다. 원본은 보존되어 있으며, 설정에서 공용 DB로 가져올 수 있습니다.`}
+            <Link href="/settings" className="ml-2 font-semibold underline">설정에서 확인</Link>
           </div>
         )}
         <main className="mx-auto max-w-6xl px-4 py-6 md:px-8 md:py-8">{children}</main>

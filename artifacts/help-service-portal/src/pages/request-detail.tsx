@@ -21,12 +21,13 @@ function RatingForm({ id }: { id: string }) {
   return (
     <form
       className="rounded-xl border border-[hsl(33_80%_70%)] bg-accent/60 p-5"
-      onSubmit={(e) => {
+      onSubmit={async (e) => {
         e.preventDefault();
         if (!score) return setErr("별점을 선택해 주세요.");
         if (text.trim().length < 2) return setErr("한 줄 의견을 남겨 주세요.");
-        rate(id, score, text.trim());
-        toast({ title: "평가가 기록되었습니다", description: "요청이 최종 종료되었습니다." });
+        if (await rate(id, score, text.trim())) {
+          toast({ title: "평가가 기록되었습니다", description: "요청이 최종 종료되었습니다." });
+        }
       }}
     >
       <div className="font-bold">처리 결과는 어떠셨나요?</div>

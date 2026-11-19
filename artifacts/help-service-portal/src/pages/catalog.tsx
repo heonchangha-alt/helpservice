@@ -20,15 +20,15 @@ function RequestForm({ service, onDone }: { service: ServiceDef; onDone: (id: st
   const [fields, setFields] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
     const err: Record<string, string> = {};
     if (title.trim().length < 4) err.title = "제목을 4자 이상 입력해 주세요.";
     service.fields.forEach((f) => { if (f.required && !fields[f.key]?.trim()) err[f.key] = `${f.label}을(를) 입력해 주세요.`; });
     setErrors(err);
     if (Object.keys(err).length) return;
-    const r = createRequest({ title: title.trim(), description: description.trim(), companyId, serviceId: service.id, fields, priority });
-    onDone(r.id);
+    const r = await createRequest({ title: title.trim(), description: description.trim(), companyId, serviceId: service.id, fields, priority });
+    if (r) onDone(r.id);
   };
 
   const err = (k: string) => errors[k] && <p role="alert" className="mt-1 text-xs text-destructive">{errors[k]}</p>;
